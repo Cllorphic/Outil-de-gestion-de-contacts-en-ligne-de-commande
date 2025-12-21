@@ -1,33 +1,36 @@
 <?php
 
-require "bdd.php";
+class DBConnect
+{
+    private PDO $pdo;
 
+    public function __construct()
+    {
+        $this->pdo = new PDO(
+            'mysql:host=127.0.0.1;dbname=carnet_adresses;charset=utf8mb4',
+            'root',
+            ''
+        );
 
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    }
+
+    public function getPDO(): PDO
+    {
+        return $this->pdo;
+    }
+    
+}
 $db = new DBConnect();
 $pdo = $db->getPDO();
 
-
-var_dump($pdo);
-
+echo "Connection BDD OK\n";
 
 while (true) {
     $line = readline("Entrez votre commande : ");
-
-    if ($line === "list") {
-
-       
-        $stmt = $pdo->query("SELECT * FROM contact");
-
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            echo $row["id"] . " | "
-               . $row["name"] . " | "
-               . $row["email"] . " | "
-               . $row["phone_number"] . "\n";
-        }
-
-    } elseif ($line === "exit") {
-        break;
-    } else {
-        echo "Commande inconnue\n";
-    }
+    if($line === "list")
+    {
+        echo 'affichage de la liste ';
+    } 
 }
+
