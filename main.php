@@ -23,32 +23,31 @@ class DBConnect
 
 class Contact
 {
-    private ?int $id = null;
-    private ?string $name = null;
+    private int $id;
+    private string $name;
+    private string $email;
+    private string $phoneNumber;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
-    public function setId(?int $id): void
-    {
+    public function __construct(
+        int $id,
+        string $name,
+        string $email,
+        string $phoneNumber
+    ) {
         $this->id = $id;
-    }
-
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
-    public function setName(?string $name): void
-    {
         $this->name = $name;
+        $this->email = $email;
+        $this->phoneNumber = $phoneNumber;
     }
 
-    public function toString(): string
+    public function getId(): int { return $this->id; }
+    public function getName(): string { return $this->name; }
+    public function getEmail(): string { return $this->email; }
+    public function getPhoneNumber(): string { return $this->phoneNumber; }
+
+    public function __toString(): string
     {
-        return "Contact #" . ($this->id ?? "null") . " : " . ($this->name ?? "Contact sans nom");
+        return "Contact #{$this->id} : {$this->name} | {$this->email} | {$this->phoneNumber}";
     }
 }
 
@@ -69,10 +68,12 @@ class ContactManager
         $contacts = [];
 
         foreach ($rows as $row) {
-            $contact = new Contact();
-            $contact->setId(isset($row['id']) ? (int)$row['id'] : null);
-            $contact->setName($row['name'] ?? null);
-            $contacts[] = $contact;
+            $contacts[] = new Contact(
+                (int)$row['id'],
+                $row['name'],
+                $row['email'],
+                $row['phone_number']
+            );
         }
 
         return $contacts;
@@ -82,26 +83,33 @@ class ContactManager
     {
         $stmt = $this->pdo->prepare("SELECT * FROM contact WHERE id = :id");
         $stmt->execute(['id' => $id]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Test immédiat demandé
-        var_dump($row);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($row === false) {
             return null;
         }
 
-        $contact = new Contact();
-        $contact->setId(isset($row['id']) ? (int)$row['id'] : null);
-        $contact->setName($row['name'] ?? null);
-
-        return $contact;
+        return new Contact(
+            (int)$row['id'],
+            $row['name'],
+            $row['email'],
+            $row['phone_number']
+        );
     }
 
-    public function create(string $name): void
+    public function create(string $name, string $email, string $phoneNumber): void
     {
-        $stmt = $this->pdo->prepare("INSERT INTO contact (name) VALUES (:name)");
-        $stmt->execute(['name' => $name]);
+        $stmt = $this->pdo->prepare(
+            "INSERT INTO contact (name, email, phone_number)
+             VALUES (:name, :email, :phone)"
+        );
+
+        $stmt->execute([
+            'name'  => $name,
+            'email' => $email,
+            'phone' => $phoneNumber
+        ]);
     }
 
     public function deleteById(int $id): void
@@ -116,7 +124,7 @@ require_once 'Command.php';
 $db = new DBConnect();
 $pdo = $db->getPDO();
 
-echo "Connection BDD OK\n";
+echo "Connexion BDD OK\n";
 
 while (true) {
     $line = readline("Entrez votre commande : ");
@@ -131,8 +139,8 @@ while (true) {
         continue;
     }
 
-    if (preg_match('/^create\s+(.+)$/', $line, $m)) {
-        (new Command())->create(trim($m[1]));
+    if (preg_match('/^create\s+(.+)\s+(.+)\s+(.+)$/', $line, $m)) {
+        (new Command())->create($m[1], $m[2], $m[3]);
         continue;
     }
 
