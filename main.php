@@ -133,7 +133,7 @@ while (true) {
         echo "Commandes disponibles :" .PHP_EOL;
         echo "- list" . PHP_EOL;
         echo "- detail" . PHP_EOL;
-        echo "- create <nom> <email> <telephone>" . PHP_EOL;
+        echo "- create <'nom'> <email> <'telephone'>" . PHP_EOL;
         echo "- delete" . PHP_EOL;
         echo "- exit" . PHP_EOL;
         continue;
@@ -149,10 +149,11 @@ while (true) {
         continue;
     }
 
-    if (preg_match('/^create\s+(.+)\s+(.+)\s+(.+)$/', $line, $m)) {
-        (new Command())->create($m[1], $m[2], $m[3]);
-        continue;
-    }
+    if (preg_match('/^create\s+"([^"]+)"\s+([^\s]+)\s+"([^"]+)"$/', $line, $m)) {
+    (new Command())->create($m[1], $m[2], $m[3]);
+    continue;
+}
+
 
     if (preg_match('/^delete\s+(\d+)$/', $line, $m)) {
         (new Command())->delete((int)$m[1]);
