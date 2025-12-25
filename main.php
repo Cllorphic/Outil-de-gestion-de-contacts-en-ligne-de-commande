@@ -129,6 +129,16 @@ echo "Connexion BDD OK\n";
 while (true) {
     $line = readline("Entrez votre commande : ");
 
+    if($line === "help"){
+        echo "Commandes disponibles :" .PHP_EOL;
+        echo "- list" . PHP_EOL;
+        echo "- detail" . PHP_EOL;
+        echo "- create <nom> <email> <telephone>" . PHP_EOL;
+        echo "- delete" . PHP_EOL;
+        echo "- exit" . PHP_EOL;
+        continue;
+    }
+
     if ($line === "list") {
         (new Command())->list();
         continue;
@@ -148,4 +158,10 @@ while (true) {
         (new Command())->delete((int)$m[1]);
         continue;
     }
+    
+    if ($line === "exit") {
+        echo "Au revoir !" . PHP_EOL;
+        break;
+    }
+     echo "Commande inconnue. Tapez 'help' pour voir les commandes disponibles." . PHP_EOL;
 }
